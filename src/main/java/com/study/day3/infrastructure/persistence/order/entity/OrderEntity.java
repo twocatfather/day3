@@ -1,5 +1,6 @@
 package com.study.day3.infrastructure.persistence.order.entity;
 
+import com.study.day3.domain.order.Order;
 import com.study.day3.domain.order.OrderId;
 import com.study.day3.domain.order.OrderItem;
 import com.study.day3.domain.order.OrderStatus;
@@ -57,5 +58,57 @@ public class OrderEntity {
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void setOrderItems(List<OrderItemEntity> orderItems) {
+        this.orderItems.clear();
+        if (orderItems != null) {
+            orderItems.forEach(this::addOrderItem);
+        }
+    }
+
+    public void addOrderItem(OrderItemEntity itemEntity) {
+        orderItems.add(itemEntity);
+        itemEntity.setOrderEntity(this);
+    }
+
+    public static OrderEntity from(Order order) {
+        OrderEntity orderEntity = OrderEntity.builder()
+                .id(order.getId() != null ? order.getId().getValue() : null)
+                .customerName(order.getCustomerName())
+                .customerEmail(order.getCustomerEmail())
+                .shippingAddress(order.getShippingAddress())
+                .status(order.getStatus())
+                .totalAmount(order.getTotalAmount().getAmount().intValue())
+                .orderedAt(order.getOrderedAt())
+                .updatedAt(order.getUpdatedAt())
+                .build();
+
+        List<OrderItemEntity> itemEntities = order.getOrderItems().stream()
+                .map(OrderItemEntity::from)
+                .toList();
+
+        orderEntity.setOrderItems(itemEntities);
+
+        return orderEntity;
+    }
+
+    public Order toDomain() {
+        // 주문항목 또 변환
+        List<OrderItem> domainOrderItems = orderItems.stream()
+                .map(OrderItemEntity::toDomain)
+                .toList();
+
+        return Order.reconstitute(
+                OrderId.of(id),
+                customerName,
+                customerEmail,
+                shippingAddress,
+                status,
+                domainOrderItems,
+                Money.of(totalAmount),
+                orderedAt,
+                updatedAt
+        );
     }
 }

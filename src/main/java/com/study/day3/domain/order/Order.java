@@ -38,6 +38,25 @@ public class Order {
         validate();
     }
 
+    public void cancel() {
+        if (status == OrderStatus.SHIPPED || status == OrderStatus.DELIVERED) {
+            throw new IllegalArgumentException("배송 중이거나 배송 완료된 주문은 취소할 수 없습니다.");
+        }
+
+        this.status = OrderStatus.CANCELLED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public static Order create(String customerName, String customerEmail,
+                               String shippingAddress, List<OrderItem> orderItems) {
+        return Order.builder()
+                .customerName(customerName)
+                .customerEmail(customerEmail)
+                .shippingAddress(shippingAddress)
+                .orderItems(orderItems)
+                .build();
+    }
+
     private void validate() {
         if (customerName == null || customerName.trim().isEmpty()) {
             throw new IllegalArgumentException("고객 이름은 필수입니다.");
@@ -52,5 +71,22 @@ public class Order {
         return orderItems.stream()
                 .map(OrderItem::getTotalPrice)
                 .reduce(Money.ZERO, Money::add);
+    }
+
+    public static Order reconstitute(OrderId id, String customerName, String customerEmail,
+                                      String shippingAddress, OrderStatus status,
+                                      List<OrderItem> orderItems, Money totalAmount,
+                                      LocalDateTime orderedAt, LocalDateTime updatedAt) {
+        Order order = new Order();
+        order.id = id;
+        order.customerName = customerName;
+        order.customerEmail = customerEmail;
+        order.shippingAddress = shippingAddress;
+        order.status = status;
+        order.orderItems = orderItems;
+        order.totalAmount = totalAmount;
+        order.orderedAt = orderedAt;
+        order.updatedAt = updatedAt;
+        return order;
     }
 }

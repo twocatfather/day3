@@ -1,5 +1,8 @@
 package com.study.day3.infrastructure.persistence.order.entity;
 
+import com.study.day3.domain.order.OrderItem;
+import com.study.day3.domain.product.ProductId;
+import com.study.day3.domain.shared.Money;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,5 +37,26 @@ public class OrderItemEntity {
     @JoinColumn(name = "order_id")
     private OrderEntity orderEntity;
 
+    public static OrderItemEntity from(OrderItem orderItem) {
+        return OrderItemEntity.builder()
+                .id(orderItem.getId())
+                .productId(orderItem.getProductId().getValue())
+                .productName(orderItem.getProductName())
+                .price(orderItem.getPrice().getAmount().intValue())
+                .quantity(orderItem.getQuantity())
+                .totalPrice(orderItem.getTotalPrice().getAmount().intValue())
+                .build();
+    }
+
+    public OrderItem toDomain() {
+        return OrderItem.reconstitute(
+                id,
+                ProductId.of(productId),
+                productName,
+                Money.of(price),
+                quantity,
+                Money.of(totalPrice)
+        );
+    }
 }
 

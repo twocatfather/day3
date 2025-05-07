@@ -23,4 +23,8 @@ public class Money {
     public Money multiply(int multiplier) {
         return new Money(this.amount.multiply(BigDecimal.valueOf(multiplier)));
     }
+
+    public static Money of (Integer amount) {
+        return new Money(BigDecimal.valueOf(amount));
+    }
 }

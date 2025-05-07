@@ -37,4 +37,28 @@ public class OrderItem {
         // price null, price.isLessThanOrEqual(Money.ZERO)
         // quantity 0 과 비교
     }
+
+    public static OrderItem create(ProductId productId, String productName,
+                                   Money price, int quantity) {
+        return OrderItem.builder()
+                .productId(productId)
+                .productName(productName)
+                .price(price)
+                .quantity(quantity)
+                .build();
+    }
+
+    public static OrderItem reconstitute(Long id, ProductId productId, String productName,
+                                         Money price, int quantity, Money totalPrice) {
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.id = id;
+        orderItem.productId = productId;
+        orderItem.productName = productName;
+        orderItem.price = price;
+        orderItem.quantity = quantity;
+        orderItem.totalPrice = totalPrice;
+
+        return orderItem;
+    }
 }
